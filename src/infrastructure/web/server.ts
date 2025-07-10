@@ -1,6 +1,6 @@
 import express from 'express';
 import { FIIService } from '../services/fii-service.js';
-import { FIIAnalyzer } from '../application/analysis/fii-analyzer.js';
+import { FIIAnalyzer } from '../../application/analysis/fii-analyzer.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
