@@ -16,10 +16,16 @@ Um software em TypeScript para analisar e comparar Fundos Imobiliários (FIIs) d
 - **Sistema de alertas** com notificações personalizadas
 - **Interface web moderna** com dashboard responsivo
 - **Interface de linha de comando** intuitiva
-- **Banco de dados SQLite** com Prisma ORM
+- **Banco de dados MongoDB** com Prisma ORM
 - **Relatórios detalhados** em formato de tabela
 - **Execução rápida** com Bun runtime
 - **Testes unitários** completos com Bun Test
+- **Clean Architecture** com separação clara de responsabilidades
+- **Event-Driven Architecture** com barramento de eventos
+- **Dependency Injection** para baixo acoplamento
+- **Specification Pattern** para regras de negócio
+- **Repository Pattern** para acesso a dados
+- **Controller Pattern** para APIs REST
 
 ## 🚀 Instalação
 
@@ -45,7 +51,7 @@ bun install
 
 4. **Configure as variáveis de ambiente:**
 ```bash
-echo 'DATABASE_URL="file:./src/infrastructure/database/data/fiis.db"' > .env
+echo 'DATABASE_URL="mongodb://localhost:27017/fiis"' > .env
 ```
 
 5. **Configure o banco de dados:**
@@ -180,17 +186,25 @@ bun run scheduler:test
 src/
 ├── __tests__/                    # Testes unitários
 │   ├── domain/
+│   │   ├── specifications/
+│   │   │   └── fii-specifications.test.ts
 │   │   └── utils/
 │   │       └── display.test.ts
 │   ├── application/
 │   │   ├── analysis/
 │   │   │   └── fii-analyzer.test.ts
+│   │   ├── services/
+│   │   │   └── fii-application-service.test.ts
 │   │   └── scrapers/
 │   │       └── status-invest-scraper.test.ts
 │   └── infrastructure/
 │       ├── database/
 │       │   └── repositories/
 │       │       └── fii-repository.test.ts
+│       ├── http/
+│       │   └── controllers/
+│       │       ├── fii-controller.test.ts
+│       │       └── alert-controller.test.ts
 │       └── services/
 │           └── data-service.test.ts
 └── infrastructure/
@@ -199,6 +213,7 @@ src/
         ├── test-usecases.ts
         ├── test-scheduler.ts
         ├── test-collection-infrastructure.ts
+        ├── test-clean-architecture.ts
         └── start-scheduler.ts
 ```
 
@@ -345,14 +360,23 @@ bun run format       # Formata código com Prettier
 
 O projeto segue os princípios da Clean Architecture:
 
-- **Domain Layer**: Regras de negócio e entidades
-- **Application Layer**: Casos de uso e orquestração
-- **Infrastructure Layer**: Implementações técnicas
+- **Domain Layer**: Regras de negócio, entidades e contratos
+- **Application Layer**: Casos de uso, orquestração e serviços de aplicação
+- **Infrastructure Layer**: Implementações técnicas, acesso a dados e frameworks
+
+### Padrões Implementados
+
+- **Repository Pattern**: Abstração do acesso a dados
+- **Dependency Injection**: Container de injeção de dependência
+- **Event-Driven Architecture**: Barramento de eventos
+- **Specification Pattern**: Regras de negócio encapsuladas
+- **Factory Pattern**: Criação centralizada de objetos
+- **Controller Pattern**: APIs REST organizadas
 
 ### Banco de Dados
 
-- **SQLite** com Prisma ORM
-- **Tabelas principais**: FII, FIIHistory, FIIAnalysis, Alert, Setting
+- **MongoDB** com Prisma ORM
+- **Tabelas principais**: FII, Alert
 - **Relacionamentos** bem definidos entre entidades
 - **Indexes** otimizados para performance
 - **Migrations** automáticas
