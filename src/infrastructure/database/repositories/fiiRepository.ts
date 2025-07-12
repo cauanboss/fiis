@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { FII, FIIAnalysis } from '../../../domain/types/fii.js';
+import { FII, FIIAnalysis } from '../../../domain/types/fii';
 
 export interface FIIHistory {
   id?: number;
@@ -20,52 +20,70 @@ export class FIIRepository {
   }
 
   async saveFiis(fiis: FII[]): Promise<void> {
-    const operations = fiis.map(fii => 
-      this.prisma.fII.upsert({
-        where: { ticker: fii.ticker },
-        update: {
-          name: fii.name,
-          price: fii.price,
-          dividendYield: fii.dividendYield,
-          pvp: fii.pvp,
-          lastDividend: fii.lastDividend,
-          dividendYield12m: fii.dividendYield12m,
-          priceVariation: fii.priceVariation,
-          source: fii.source,
-          lastUpdate: fii.lastUpdate
-        },
-        create: {
-          ticker: fii.ticker,
-          name: fii.name,
-          price: fii.price,
-          dividendYield: fii.dividendYield,
-          pvp: fii.pvp,
-          lastDividend: fii.lastDividend,
-          dividendYield12m: fii.dividendYield12m,
-          priceVariation: fii.priceVariation,
-          source: fii.source,
-          lastUpdate: fii.lastUpdate
-        }
-      })
-    );
+    for (const fii of fiis) {
+      try {
+        // Check if FII exists
+        const existingFii = await this.prisma.fII.findUnique({
+          where: { ticker: fii.ticker }
+        });
 
-    await this.prisma.$transaction(operations);
+        if (existingFii) {
+          // Update existing FII
+          await this.prisma.fII.update({
+            where: { ticker: fii.ticker },
+            data: {
+              name: fii.name,
+              price: fii.price,
+              dividendYield: fii.dividendYield,
+              pvp: fii.pvp,
+              lastDividend: fii.lastDividend,
+              dividendYield12m: fii.dividendYield12m,
+              priceVariation: fii.priceVariation,
+              source: fii.source,
+              lastUpdate: fii.lastUpdate
+            }
+          });
+        } else {
+          // Create new FII
+          await this.prisma.fII.create({
+            data: {
+              ticker: fii.ticker,
+              name: fii.name,
+              price: fii.price,
+              dividendYield: fii.dividendYield,
+              pvp: fii.pvp,
+              lastDividend: fii.lastDividend,
+              dividendYield12m: fii.dividendYield12m,
+              priceVariation: fii.priceVariation,
+              source: fii.source,
+              lastUpdate: fii.lastUpdate
+            }
+          });
+        }
+      } catch (error) {
+        console.error(`❌ Erro ao salvar FII ${fii.ticker}:`, error);
+      }
+    }
   }
 
   async saveFIIHistory(fiis: FII[]): Promise<void> {
-    const historyRecords = fiis.map(fii => ({
-      ticker: fii.ticker,
-      price: fii.price,
-      dividendYield: fii.dividendYield,
-      pvp: fii.pvp,
-      lastDividend: fii.lastDividend,
-      source: fii.source,
-      timestamp: new Date()
-    }));
-
-    await this.prisma.fIIHistory.createMany({
-      data: historyRecords
-    });
+    for (const fii of fiis) {
+      try {
+        await this.prisma.fIIHistory.create({
+          data: {
+            ticker: fii.ticker,
+            price: fii.price,
+            dividendYield: fii.dividendYield,
+            pvp: fii.pvp,
+            lastDividend: fii.lastDividend,
+            source: fii.source,
+            timestamp: new Date()
+          }
+        });
+      } catch (error) {
+        console.error(`❌ Erro ao salvar histórico do FII ${fii.ticker}:`, error);
+      }
+    }
   }
 
   async getFiis(): Promise<FII[]> {
@@ -113,22 +131,26 @@ export class FIIRepository {
   }
 
   async saveAnalyses(analyses: FIIAnalysis[]): Promise<void> {
-    const analysisRecords = analyses.map(analysis => ({
-      ticker: analysis.ticker,
-      name: analysis.name,
-      price: analysis.price,
-      dividendYield: analysis.dividendYield,
-      pvp: analysis.pvp,
-      score: analysis.score,
-      rank: analysis.rank,
-      recommendation: analysis.recommendation,
-      analysis: analysis.analysis,
-      timestamp: new Date()
-    }));
-
-    await this.prisma.fIIAnalysis.createMany({
-      data: analysisRecords
-    });
+    for (const analysis of analyses) {
+      try {
+        await this.prisma.fIIAnalysis.create({
+          data: {
+            ticker: analysis.ticker,
+            name: analysis.name,
+            price: analysis.price,
+            dividendYield: analysis.dividendYield,
+            pvp: analysis.pvp,
+            score: analysis.score,
+            rank: analysis.rank,
+            recommendation: analysis.recommendation,
+            analysis: analysis.analysis,
+            timestamp: new Date()
+          }
+        });
+      } catch (error) {
+        console.error(`❌ Erro ao salvar análise do FII ${analysis.ticker}:`, error);
+      }
+    }
   }
 
   async getLatestAnalyses(): Promise<FIIAnalysis[]> {

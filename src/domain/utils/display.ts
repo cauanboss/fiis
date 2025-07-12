@@ -1,4 +1,4 @@
-import { FIIAnalysis } from '../domain/types/fii.js';
+import { FIIAnalysis } from '../types/fii';
 import chalk from 'chalk';
 import { table } from 'table';
 

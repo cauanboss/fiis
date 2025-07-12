@@ -10,7 +10,10 @@ export class Database {
         db: {
           url: process.env.DATABASE_URL || 'file:./src/infrastructure/database/data/fiis.db'
         }
-      }
+      },
+      // Disable transactions for MongoDB
+      log: ['error', 'warn'],
+      errorFormat: 'pretty'
     });
   }
 
@@ -42,7 +45,8 @@ export class Database {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
+      // Use a simple query instead of raw SQL for MongoDB
+      await this.prisma.fII.findFirst();
       return true;
     } catch (error) {
       console.error('❌ Health check falhou:', error);

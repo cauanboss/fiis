@@ -1,4 +1,4 @@
-import { FII, FIIAnalysis, AnalysisConfig } from '../domain/types/fii.js';
+import { FII, FIIAnalysis, AnalysisConfig } from '../domain/types/fii';
 
 export class FIIAnalyzer {
   private defaultConfig: AnalysisConfig = {

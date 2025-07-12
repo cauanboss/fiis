@@ -1,3 +1,3 @@
-import { main } from './infrastructure/index.js';
+import { main } from './infrastructure/index';
 
 main();

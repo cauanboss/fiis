@@ -93,3 +93,19 @@ jspm_packages/
 # TernJS port file
 .tern-port 
 /src/generated/prisma
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+
+# MongoDB data
+mongo-data/

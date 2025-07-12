@@ -1,0 +1,63 @@
+# Docker Compose configuration for FII Analyzer
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: fii-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: fii_password
+      MONGO_INITDB_DATABASE: fii_analyzer
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - fii-network
+
+  # MongoDB Express (Optional - for database management)
+  mongo-express:
+    image: mongo-express:1.0.0
+    container_name: fii-mongo-express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: fii_password
+      ME_CONFIG_MONGODB_URL: mongodb://admin:fii_password@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: fii_password
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongodb
+    networks:
+      - fii-network
+  # FII Analyzer Application
+  # fii-analyzer:
+  #   build: .
+  #   container_name: fii-analyzer-app
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: 3000
+  #     DATABASE_URL: mongodb://admin:fii_password@mongodb:27017/fii_analyzer?authSource=admin
+  #     MONGODB_URI: mongodb://admin:fii_password@mongodb:27017/fii_analyzer?authSource=admin
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - mongodb
+  #   networks:
+  #     - fii-network
+  #   volumes:
+  #     - ./logs:/app/logs
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  fii-network:
+    driver: bridge

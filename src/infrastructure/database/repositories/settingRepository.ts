@@ -8,11 +8,24 @@ export class SettingRepository {
   }
 
   async saveSetting(key: string, value: string): Promise<void> {
-    await this.prisma.setting.upsert({
-      where: { key },
-      update: { value },
-      create: { key, value }
-    });
+    try {
+      const existing = await this.prisma.setting.findUnique({
+        where: { key }
+      });
+
+      if (existing) {
+        await this.prisma.setting.update({
+          where: { key },
+          data: { value }
+        });
+      } else {
+        await this.prisma.setting.create({
+          data: { key, value }
+        });
+      }
+    } catch (error) {
+      console.error(`❌ Erro ao salvar configuração ${key}:`, error);
+    }
   }
 
   async getSetting(key: string): Promise<string | null> {

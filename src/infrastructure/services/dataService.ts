@@ -1,6 +1,6 @@
-import { Database } from '../database/database.js';
-import { FIIRepository, AlertRepository, SettingRepository, Alert, FIIHistory } from '../database/repositories/index.js';
-import { FII, FIIAnalysis } from '../../domain/types/fii.js';
+import { Database } from '../database/database';
+import { FIIRepository, AlertRepository, SettingRepository, Alert, FIIHistory } from '../database/repositories/index';
+import { FII, FIIAnalysis } from '../../domain/types/fii';
 
 export class DataService {
   private database: Database;

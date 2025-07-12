@@ -4,21 +4,25 @@ Um software em TypeScript para analisar e comparar Fundos Imobiliários (FIIs) d
 
 ## ✨ Funcionalidades
 
-- **Coleta automática de dados** dos principais sites de FIIs
+- **Coleta automática de dados** de 4 fontes principais de FIIs
 - **Análise inteligente** baseada em múltiplos critérios:
-  - Dividend Yield
-  - Preço sobre Valor Patrimonial (P/VP)
-  - Preço da cota
-  - Histórico de dividendos
+  - Dividend Yield (40% do score)
+  - Preço sobre Valor Patrimonial (P/VP) (30% do score)
+  - Preço da cota (20% do score)
+  - Liquidez (10% do score)
 - **Ranking personalizado** dos melhores FIIs
 - **Recomendações automáticas** (BUY/HOLD/SELL)
+- **Interface web moderna** com dashboard responsivo
 - **Interface de linha de comando** intuitiva
+- **Banco de dados SQLite** com Prisma ORM
 - **Relatórios detalhados** em formato de tabela
 - **Execução rápida** com Bun runtime
 
 ## 🚀 Instalação
 
-### Pré-requisitos
+### Opção 1: Instalação Local (Recomendado)
+
+#### Pré-requisitos
 
 1. **Instale o Bun:**
 ```bash
@@ -36,9 +40,43 @@ cd fii-analyzer
 bun install
 ```
 
+4. **Configure as variáveis de ambiente:**
+```bash
+echo 'DATABASE_URL="file:./src/infrastructure/database/data/fiis.db"' > .env
+```
+
+5. **Configure o banco de dados:**
+```bash
+bun run db:generate
+bun run db:push
+```
+
+### Opção 2: Docker (Para desenvolvimento)
+
+1. **Clone o repositório:**
+```bash
+git clone <url-do-repositorio>
+cd fii-analyzer
+```
+
+2. **Execute com Docker Compose:**
+```bash
+docker-compose up -d
+```
+
+3. **Acesse a aplicação:**
+- **Interface Web**: http://localhost:3000
+- **MongoDB Express**: http://localhost:8081 (admin/fii_password)
+
 ## 📖 Como Usar
 
-### Comandos Disponíveis
+### Interface Web (Recomendado)
+```bash
+bun run web
+```
+Acesse `http://localhost:3000` para ver o dashboard interativo.
+
+### Interface de Linha de Comando
 
 #### 1. Análise Geral (Padrão)
 ```bash
@@ -84,6 +122,9 @@ bun start buy
 
 # Executar em modo desenvolvimento (watch)
 bun run dev
+
+# Iniciar interface web
+bun run web
 ```
 
 ## 📊 Critérios de Análise
@@ -93,28 +134,35 @@ O software utiliza os seguintes critérios para rankear os FIIs:
 ### Filtros Básicos
 - **Dividend Yield mínimo:** 6% ao ano
 - **P/VP máximo:** 1.2
-- **Preço da cota:** Entre R$ 50 e R$ 200
+- **Preço da cota:** Entre R$ 5 e R$ 200
 
 ### Pesos da Análise
-- **Dividend Yield:** 50% do score
+- **Dividend Yield:** 40% do score
 - **P/VP:** 30% do score  
 - **Preço:** 20% do score
+- **Liquidez:** 10% do score
 
 ### Recomendações
 - **BUY:** Score ≥ 0.7
-- **HOLD:** Score entre 0.5 e 0.7
-- **SELL:** Score < 0.5
+- **HOLD:** Score entre 0.4 e 0.7
+- **SELL:** Score < 0.4
 
 ## 🏗️ Estrutura do Projeto
 
 ```
 src/
-├── types/           # Interfaces TypeScript
-├── scrapers/        # Scrapers para diferentes sites
-├── analysis/        # Lógica de análise
-├── services/        # Serviços principais
-├── utils/           # Utilitários
-└── index.ts         # Ponto de entrada
+├── domain/              # Camada de domínio
+│   ├── types/          # Interfaces TypeScript
+│   └── utils/          # Utilitários
+├── application/         # Camada de aplicação
+│   ├── scrapers/       # Scrapers para diferentes sites
+│   └── analysis/       # Lógica de análise
+├── infrastructure/      # Camada de infraestrutura
+│   ├── database/       # Banco de dados e repositórios
+│   ├── services/       # Serviços de infraestrutura
+│   ├── web/           # Interface web (Express)
+│   └── config/        # Configurações
+└── index.ts           # Ponto de entrada
 ```
 
 ## 🔧 Desenvolvimento
@@ -125,7 +173,20 @@ src/
 # Desenvolvimento
 bun run dev          # Executa em modo desenvolvimento (watch)
 bun start            # Executa o projeto
+bun run web          # Inicia interface web
 bun run build        # Compila o projeto para distribuição
+
+# Banco de dados
+bun run db:generate  # Gera cliente Prisma
+bun run db:push      # Sincroniza schema com banco
+bun run db:migrate   # Cria migration
+bun run db:studio    # Abre Prisma Studio
+
+# Docker
+docker-compose up -d     # Inicia todos os serviços
+docker-compose down      # Para todos os serviços
+docker-compose logs      # Visualiza logs
+docker-compose restart   # Reinicia serviços
 
 # Qualidade de código
 bun run lint         # Executa ESLint
@@ -143,29 +204,28 @@ bun test             # Executa testes
 - **Hot reload** automático em desenvolvimento
 - **Menor uso de memória**
 
-### Adicionando Novos Scrapers
+### Arquitetura Limpa
 
-1. Crie uma nova classe que estenda `BaseScraper`
-2. Implemente o método `scrape()`
-3. Adicione o scraper ao array em `FIIService`
+O projeto segue os princípios da Clean Architecture:
 
-Exemplo:
-```typescript
-export class NovoScraper extends BaseScraper {
-  constructor() {
-    super('https://exemplo.com');
-  }
+- **Domain Layer**: Regras de negócio e entidades
+- **Application Layer**: Casos de uso e orquestração
+- **Infrastructure Layer**: Implementações técnicas
 
-  async scrape(): Promise<ScrapingResult> {
-    // Implementação do scraping
-  }
-}
-```
+### Banco de Dados
+
+- **SQLite** com Prisma ORM
+- **Tabelas principais**: FII, FIIHistory, FIIAnalysis, Alert, Setting
+- **Relacionamentos** bem definidos entre entidades
+- **Indexes** otimizados para performance
+- **Migrations** automáticas
 
 ## 📈 Sites Suportados
 
 - **Status Invest** - Dados de dividendos e preços
 - **Funds Explorer** - Ranking e análises detalhadas
+- **Brapi** - Dados de mercado em tempo real
+- **Clube FII** - Análises especializadas
 
 ## ⚠️ Avisos Importantes
 

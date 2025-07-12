@@ -12,7 +12,7 @@ export class FundsExplorerScraper {
       
       // Iniciar navegador headless
       browser = await puppeteer.launch({
-        headless: "new",
+        headless: true,
         args: [
           '--no-sandbox', 
           '--disable-setuid-sandbox',
@@ -39,7 +39,7 @@ export class FundsExplorerScraper {
       await page.waitForSelector('table tbody tr', { timeout: 30000 });
       
       // Aguardar um pouco mais para garantir que todos os dados carregaram
-      await page.waitForTimeout(5000);
+      await new Promise(resolve => setTimeout(resolve, 5000));
       
       // Extrair o HTML da página
       const html = await page.content();

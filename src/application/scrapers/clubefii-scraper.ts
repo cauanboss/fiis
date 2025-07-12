@@ -11,7 +11,7 @@ export class ClubeFIIScraper {
       console.log('🔍 Clube FII: Iniciando coleta de dados com Puppeteer...');
       
       browser = await puppeteer.launch({
-        headless: "new",
+        headless: true,
         args: [
           '--no-sandbox', 
           '--disable-setuid-sandbox',
@@ -32,7 +32,7 @@ export class ClubeFIIScraper {
       });
       
       await page.waitForSelector('table', { timeout: 30000 });
-      await page.waitForTimeout(5000);
+      await new Promise(resolve => setTimeout(resolve, 5000));
       
       const html = await page.content();
       const $ = cheerio.load(html);

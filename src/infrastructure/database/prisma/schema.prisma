@@ -12,30 +12,30 @@ datasource db {
 }
 
 model FII {
-  id                Int      @id @default(autoincrement())
-  ticker            String   @unique
-  name              String
-  price             Float
-  dividendYield     Float
-  pvp               Float
-  lastDividend      Float
-  dividendYield12m  Float
-  priceVariation    Float
-  source            String
-  lastUpdate        DateTime
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String   @id @default(cuid())
+  ticker           String   @unique
+  name             String
+  price            Float
+  dividendYield    Float
+  pvp              Float
+  lastDividend     Float
+  dividendYield12m Float
+  priceVariation   Float
+  source           String
+  lastUpdate       DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   // Relacionamentos
-  history           FIIHistory[]
-  analyses          FIIAnalysis[]
-  alerts            Alert[]
+  history  FIIHistory[]
+  analyses FIIAnalysis[]
+  alerts   Alert[]
 
   @@map("fiis")
 }
 
 model FIIHistory {
-  id            Int      @id @default(autoincrement())
+  id            String   @id @default(cuid())
   ticker        String
   price         Float
   dividendYield Float
@@ -45,13 +45,13 @@ model FIIHistory {
   timestamp     DateTime @default(now())
 
   // Relacionamento
-  fii           FII      @relation(fields: [ticker], references: [ticker])
+  fii FII @relation(fields: [ticker], references: [ticker])
 
   @@map("fii_history")
 }
 
 model FIIAnalysis {
-  id             Int      @id @default(autoincrement())
+  id             String   @id @default(cuid())
   ticker         String
   name           String
   price          Float
@@ -64,28 +64,29 @@ model FIIAnalysis {
   timestamp      DateTime @default(now())
 
   // Relacionamento
-  fii            FII      @relation(fields: [ticker], references: [ticker])
+  fii FII @relation(fields: [ticker], references: [ticker])
 
   @@map("fii_analyses")
 }
 
 model Alert {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(cuid())
   ticker    String
-  type      String   // 'PRICE' | 'DY' | 'PVP'
-  condition String   // 'ABOVE' | 'BELOW'
+  type      String // 'PRICE' | 'DY' | 'PVP'
+  condition String // 'ABOVE' | 'BELOW'
   value     Float
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
   // Relacionamento
-  fii       FII      @relation(fields: [ticker], references: [ticker])
+  fii FII @relation(fields: [ticker], references: [ticker])
 
   @@map("alerts")
 }
 
 model Setting {
-  key       String   @id
+  id        String   @id @default(cuid())
+  key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
 

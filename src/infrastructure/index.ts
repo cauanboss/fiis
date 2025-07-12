@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 
-import { FIIAnalyzer } from '../application/analysis/fii-analyzer.js';
-import { FundsExplorerScraper } from '../application/scrapers/fundsexplorer-scraper.js';
-import { ClubeFIIScraper } from '../application/scrapers/clubefii-scraper.js';
-import { DataService } from './services/dataService.js';
-import { DisplayUtils } from '../domain/utils/display.js';
+import { FIIAnalyzer } from '../application/analysis/fii-analyzer';
+import { FundsExplorerScraper } from '../application/scrapers/fundsexplorer-scraper';
+import { ClubeFIIScraper } from '../application/scrapers/clubefii-scraper';
+import { DataService } from './services/dataService';
+import { DisplayUtils } from '../domain/utils/display';
 
 async function main() {
   try {
