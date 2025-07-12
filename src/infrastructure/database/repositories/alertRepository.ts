@@ -1,14 +1,16 @@
 import { PrismaClient } from '@prisma/client';
+import { Alert as DomainAlert, AlertType, AlertCondition } from '../../../domain/types/fii';
 
-export interface Alert {
-  id?: number;
+export type Alert = {
+  id?: string;
   ticker: string;
-  type: 'PRICE' | 'DY' | 'PVP';
-  condition: 'ABOVE' | 'BELOW';
+  type: AlertType;
+  condition: AlertCondition;
   value: number;
   active: boolean;
   createdAt: Date;
-}
+  message?: string;
+};
 
 export class AlertRepository {
   private prisma: PrismaClient;
@@ -17,7 +19,7 @@ export class AlertRepository {
     this.prisma = prisma;
   }
 
-  async createAlert(alert: Omit<Alert, 'id' | 'createdAt'>): Promise<number> {
+  async createAlert(alert: Omit<Alert, 'id' | 'createdAt'>): Promise<string> {
     const result = await this.prisma.alert.create({
       data: {
         ticker: alert.ticker,
@@ -48,13 +50,13 @@ export class AlertRepository {
     }));
   }
 
-  async deleteAlert(id: number): Promise<void> {
+  async deleteAlert(id: string): Promise<void> {
     await this.prisma.alert.delete({
       where: { id }
     });
   }
 
-  async updateAlert(id: number, data: Partial<Alert>): Promise<void> {
+  async updateAlert(id: string, data: Partial<Alert>): Promise<void> {
     await this.prisma.alert.update({
       where: { id },
       data: {
@@ -117,11 +119,21 @@ export class AlertRepository {
         case 'PVP':
           currentValue = fii.pvp;
           break;
+        case 'SCORE':
+          // Para SCORE, precisamos buscar a análise mais recente
+          const analysis = await this.prisma.fIIAnalysis.findFirst({
+            where: { ticker: alert.ticker },
+            orderBy: { timestamp: 'desc' }
+          });
+          currentValue = analysis?.score || 0;
+          break;
       }
 
       if (alert.condition === 'ABOVE' && currentValue > alert.value) {
         triggered = true;
       } else if (alert.condition === 'BELOW' && currentValue < alert.value) {
+        triggered = true;
+      } else if (alert.condition === 'EQUALS' && Math.abs(currentValue - alert.value) < 0.01) {
         triggered = true;
       }
 
@@ -131,5 +143,96 @@ export class AlertRepository {
     }
 
     return triggeredAlerts;
+  }
+
+  /**
+   * Busca alertas por tipo
+   */
+  async getAlertsByType(type: AlertType): Promise<Alert[]> {
+    const alerts = await this.prisma.alert.findMany({
+      where: { 
+        type,
+        active: true 
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return alerts.map(alert => ({
+      id: alert.id,
+      ticker: alert.ticker,
+      type: alert.type as AlertType,
+      condition: alert.condition as AlertCondition,
+      value: alert.value,
+      active: alert.active,
+      createdAt: alert.createdAt
+    }));
+  }
+
+  /**
+   * Desativa todos os alertas de um FII
+   */
+  async deactivateAlertsByTicker(ticker: string): Promise<void> {
+    await this.prisma.alert.updateMany({
+      where: { 
+        ticker: ticker.toUpperCase(),
+        active: true 
+      },
+      data: { active: false }
+    });
+  }
+
+  /**
+   * Ativa todos os alertas de um FII
+   */
+  async activateAlertsByTicker(ticker: string): Promise<void> {
+    await this.prisma.alert.updateMany({
+      where: { 
+        ticker: ticker.toUpperCase(),
+        active: false 
+      },
+      data: { active: true }
+    });
+  }
+
+  /**
+   * Busca estatísticas dos alertas
+   */
+  async getAlertStats(): Promise<{
+    totalAlerts: number;
+    activeAlerts: number;
+    alertsByType: { [key: string]: number };
+    alertsByTicker: { [key: string]: number };
+  }> {
+    const [totalAlerts, activeAlerts, alertsByType, alertsByTicker] = await Promise.all([
+      this.prisma.alert.count(),
+      this.prisma.alert.count({ where: { active: true } }),
+      this.prisma.alert.groupBy({
+        by: ['type'],
+        _count: { type: true },
+        where: { active: true }
+      }),
+      this.prisma.alert.groupBy({
+        by: ['ticker'],
+        _count: { ticker: true },
+        where: { active: true }
+      })
+    ]);
+
+    const typeStats: { [key: string]: number } = {};
+    alertsByType.forEach(group => {
+      typeStats[group.type] = group._count.type;
+    });
+
+    const tickerStats: { [key: string]: number } = {};
+    alertsByTicker.forEach(group => {
+      tickerStats[group.ticker] = group._count.ticker;
+    });
+
+    return {
+      totalAlerts,
+      activeAlerts,
+      alertsByType: typeStats,
+      alertsByTicker: tickerStats
+    };
   }
 } 

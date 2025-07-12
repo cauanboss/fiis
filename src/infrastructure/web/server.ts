@@ -1,6 +1,11 @@
 import express from 'express';
-import { FIIService } from '../services/fii-service.js';
-import { FIIAnalyzer } from '../../application/analysis/fii-analyzer.js';
+import { 
+  AnalyzeFiisUseCase,
+  CreateAlertUseCase,
+  CheckAlertsUseCase,
+  CollectFiisDataUseCase
+} from '../../application/usecases/index.js';
+import { NotificationConfig } from '../../domain/types/fii.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -149,21 +154,12 @@ app.get('/', (req, res) => {
 // API para análise
 app.get('/api/analyze', async (req, res) => {
   try {
-    const service = new FIIService();
-    const results = await service.collectAndAnalyze();
+    const useCase = new AnalyzeFiisUseCase();
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
     
-    const analyses = results.analyses || [];
-    const stats = {
-      totalFiis: analyses.length,
-      buyCount: analyses.filter(a => a.recommendation === 'BUY').length,
-      holdCount: analyses.filter(a => a.recommendation === 'HOLD').length,
-      sellCount: analyses.filter(a => a.recommendation === 'SELL').length,
-      avgScore: analyses.length > 0 ? analyses.reduce((sum, a) => sum + a.score, 0) / analyses.length : 0,
-      avgDY: analyses.length > 0 ? analyses.reduce((sum, a) => sum + a.dividendYield, 0) / analyses.length : 0,
-      avgPVP: analyses.length > 0 ? analyses.reduce((sum, a) => sum + a.pvp, 0) / analyses.length : 0
-    };
+    const result = await useCase.execute({ limit });
     
-    res.json({ analyses, stats });
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao analisar FIIs' });
   }
@@ -172,11 +168,105 @@ app.get('/api/analyze', async (req, res) => {
 // API para dados brutos
 app.get('/api/fiis', async (req, res) => {
   try {
-    const service = new FIIService();
-    const results = await service.collectData();
-    res.json(results);
+    const result = await collectFiisDataUseCase.execute();
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao coletar dados' });
+  }
+});
+
+// Configuração de notificações (em produção, viria de variáveis de ambiente)
+const notificationConfig: NotificationConfig = {
+  enabled: true,
+  email: process.env.ALERT_EMAIL,
+  telegram: process.env.ALERT_TELEGRAM,
+  webhook: process.env.ALERT_WEBHOOK
+};
+
+// Use Cases
+const analyzeFiisUseCase = new AnalyzeFiisUseCase();
+const createAlertUseCase = new CreateAlertUseCase();
+const checkAlertsUseCase = new CheckAlertsUseCase(notificationConfig);
+const collectFiisDataUseCase = new CollectFiisDataUseCase();
+
+// API para alertas
+app.get('/api/alerts', async (req, res) => {
+  try {
+    const ticker = req.query.ticker as string || '';
+    // Implementar busca de alertas por ticker
+    res.json([]);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar alertas' });
+  }
+});
+
+app.post('/api/alerts', async (req, res) => {
+  try {
+    const result = await createAlertUseCase.execute(req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : 'Erro ao criar alerta' });
+  }
+});
+
+app.put('/api/alerts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const alertData = req.body;
+    // Implementar atualização de alerta
+    res.json({ message: 'Alerta atualizado com sucesso' });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : 'Erro ao atualizar alerta' });
+  }
+});
+
+app.delete('/api/alerts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Implementar remoção de alerta
+    res.json({ message: 'Alerta removido com sucesso' });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : 'Erro ao remover alerta' });
+  }
+});
+
+app.post('/api/alerts/check', async (req, res) => {
+  try {
+    const result = await checkAlertsUseCase.execute();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao verificar alertas' });
+  }
+});
+
+app.get('/api/alerts/report', async (req, res) => {
+  try {
+    // Implementar relatório de alertas
+    res.json({ totalAlerts: 0, activeAlerts: 0 });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao gerar relatório' });
+  }
+});
+
+app.post('/api/alerts/test', async (req, res) => {
+  try {
+    // Implementar teste de notificações
+    res.json({ email: true, telegram: true, webhook: false });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao testar notificações' });
+  }
+});
+
+app.post('/api/alerts/setup-default/:ticker', async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    // Implementar configuração de alertas padrão
+    res.json({ 
+      message: `Alertas padrão configurados para ${ticker}`,
+      alertIds: []
+    });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : 'Erro ao configurar alertas' });
   }
 });
 

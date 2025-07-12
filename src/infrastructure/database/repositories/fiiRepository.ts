@@ -1,16 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { FII, FIIAnalysis } from '../../../domain/types/fii';
-
-export interface FIIHistory {
-  id?: number;
-  ticker: string;
-  price: number;
-  dividendYield: number;
-  pvp: number;
-  lastDividend: number;
-  source: string;
-  timestamp: Date;
-}
+import { FII, FIIAnalysis, FIIHistory } from '../../../domain/types/index.js';
 
 export class FIIRepository {
   private prisma: PrismaClient;

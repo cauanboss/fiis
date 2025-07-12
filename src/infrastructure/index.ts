@@ -1,14 +1,16 @@
 #!/usr/bin/env bun
 
-import { FIIAnalyzer } from '../application/analysis/fii-analyzer';
-import { FundsExplorerScraper } from '../application/scrapers/fundsexplorer-scraper';
-import { ClubeFIIScraper } from '../application/scrapers/clubefii-scraper';
-import { DataService } from './services/dataService';
-import { DisplayUtils } from '../domain/utils/display';
+import { SchedulerService } from './services/scheduler-service.js';
+import { FIIRepository } from './database/repositories/fiiRepository.js';
+import { AlertRepository } from './database/repositories/alertRepository.js';
+import { DataService } from './services/dataService.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 async function main() {
   try {
-    console.log('🚀 Iniciando análise de FIIs...');
+    console.log('🚀 Iniciando FII Analyzer com Scheduler...');
     
     const dataService = DataService.getInstance();
     
@@ -16,76 +18,55 @@ async function main() {
     console.log('🔌 Conectando ao banco de dados...');
     await dataService.connect();
     
-    // Coletar dados dos scrapers
-    console.log('📊 Coletando dados dos FIIs...');
+    // Configurar scheduler
+    const timesPerDay = Number(process.env.COLLECTIONS_PER_DAY) || 4;
+    // const intervalMinutes = Math.floor((24 * 60) / timesPerDay);
+    const intervalMinutes = 5000;
     
-    const scrapers = [
-      new FundsExplorerScraper(),
-      new ClubeFIIScraper()
-    ];
-
-    let allFiis: any[] = [];
+    console.log(`⏰ Configurando scheduler para ${timesPerDay} coletas por dia (a cada ${intervalMinutes} minutos)`);
     
-    for (const scraper of scrapers) {
-      try {
-        console.log(`🔍 Executando scraper: ${scraper.constructor.name}`);
-        const result = await scraper.scrape();
-        const fiis = result.data || [];
-        console.log(`✅ ${fiis.length} FIIs coletados de ${scraper.constructor.name}`);
-        allFiis = allFiis.concat(fiis);
-      } catch (error) {
-        console.error(`❌ Erro no scraper ${scraper.constructor.name}:`, error);
+    const scheduler = SchedulerService.getInstance(
+      new FIIRepository(dataService['database'].getClient()),
+      new AlertRepository(dataService['database'].getClient()),
+      {
+        collectionInterval: intervalMinutes,
+        analysisInterval: intervalMinutes,
+        alertCheckInterval: 60, // Verificar alertas a cada 1 hora
+        enabled: true
       }
-    }
+    );
 
-    if (allFiis.length === 0) {
-      console.error('❌ Nenhum FII foi coletado. Verifique os scrapers.');
-      return;
-    }
-
-    console.log(`📈 Total de ${allFiis.length} FIIs coletados`);
-
-    // Salvar dados no banco
-    console.log('💾 Salvando dados no banco...');
-    await dataService.saveFiis(allFiis);
-    await dataService.saveFIIHistory(allFiis);
-
-    // Analisar FIIs
-    console.log('🔍 Analisando FIIs...');
-    const analyzer = new FIIAnalyzer();
-    const analyses = analyzer.analyze(allFiis);
-
-    // Salvar análises no banco
-    console.log('💾 Salvando análises no banco...');
-    await dataService.saveAnalyses(analyses);
-
-    // Verificar alertas
-    console.log('🔔 Verificando alertas...');
-    const triggeredAlerts = await dataService.checkAlerts();
+    // Iniciar scheduler
+    scheduler.start();
     
-    if (triggeredAlerts.length > 0) {
-      console.log(`⚠️  ${triggeredAlerts.length} alertas acionados:`);
-      triggeredAlerts.forEach(alert => {
-        console.log(`   - ${alert.ticker}: ${alert.type} ${alert.condition} ${alert.value}`);
+    console.log('✅ Scheduler iniciado com sucesso!');
+    console.log('📊 Status:', scheduler.getStatus());
+    
+    // Manter o processo rodando
+    console.log('\n🔄 Scheduler rodando... Pressione Ctrl+C para parar');
+    
+    // Capturar sinais para parar graciosamente
+    process.on('SIGINT', () => {
+      console.log('\n🛑 Recebido SIGINT, parando scheduler...');
+      scheduler.stop();
+      dataService.close().then(() => {
+        console.log('✅ Scheduler parado e conexões fechadas');
+        process.exit(0);
       });
-    }
-
-    // Exibir resultados
-    console.log('📊 Exibindo resultados...');
-    DisplayUtils.displayTopFiis(analyses);
-
-    // Estatísticas do banco
-    const stats = await dataService.getDatabaseStats();
-    console.log('📊 Estatísticas do banco:', stats);
-
-    console.log('✅ Análise concluída com sucesso!');
+    });
+    
+    process.on('SIGTERM', () => {
+      console.log('\n🛑 Recebido SIGTERM, parando scheduler...');
+      scheduler.stop();
+      dataService.close().then(() => {
+        console.log('✅ Scheduler parado e conexões fechadas');
+        process.exit(0);
+      });
+    });
     
   } catch (error) {
-    console.error('❌ Erro durante a execução:', error);
-  } finally {
-    // Fechar conexão com o banco
-    const dataService = DataService.getInstance();
-    await dataService.close();
+    console.error('❌ Erro durante a inicialização:', error);
+    process.exit(1);
   }
 }
 
@@ -94,4 +75,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }
 
-export { main }; 
+export { main };
+export { SchedulerService } from './services/scheduler-service.js'; 

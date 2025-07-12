@@ -12,11 +12,14 @@ Um software em TypeScript para analisar e comparar Fundos Imobiliários (FIIs) d
   - Liquidez (10% do score)
 - **Ranking personalizado** dos melhores FIIs
 - **Recomendações automáticas** (BUY/HOLD/SELL)
+- **Sistema de agendamento** para coleta e análise automática
+- **Sistema de alertas** com notificações personalizadas
 - **Interface web moderna** com dashboard responsivo
 - **Interface de linha de comando** intuitiva
 - **Banco de dados SQLite** com Prisma ORM
 - **Relatórios detalhados** em formato de tabela
 - **Execução rápida** com Bun runtime
+- **Testes unitários** completos com Bun Test
 
 ## 🚀 Instalação
 
@@ -78,13 +81,21 @@ Acesse `http://localhost:3000` para ver o dashboard interativo.
 
 ### Interface de Linha de Comando
 
-#### 1. Análise Geral (Padrão)
+#### 1. Análise Manual (Uma vez)
 ```bash
 bun start
 # ou
 bun run dev
 ```
-Mostra os top 10 FIIs recomendados.
+Executa uma análise completa uma vez e mostra os resultados.
+
+#### 2. Análise Automática (Contínua)
+```bash
+bun run start:auto
+# ou
+bun run scheduler:start
+```
+Inicia o scheduler que executa análises automaticamente em intervalos configuráveis.
 
 #### 2. Top FIIs
 ```bash
@@ -127,6 +138,121 @@ bun run dev
 bun run web
 ```
 
+## 🧪 Testes
+
+### Executar Todos os Testes
+```bash
+bun test
+```
+
+### Executar Testes em Modo Watch
+```bash
+bun run test:watch
+```
+
+### Executar Testes com Cobertura
+```bash
+bun run test:coverage
+```
+
+### Executar Testes Verbosos
+```bash
+bun run test:verbose
+```
+
+### Testes Específicos
+```bash
+# Testar sistema de alertas
+bun run test:alerts
+
+# Testar casos de uso
+bun run test:usecases
+
+# Testar infraestrutura de coleta
+bun run test:collection
+
+# Testar scheduler
+bun run scheduler:test
+```
+
+### Estrutura de Testes
+```
+src/
+├── __tests__/                    # Testes unitários
+│   ├── domain/
+│   │   └── utils/
+│   │       └── display.test.ts
+│   ├── application/
+│   │   ├── analysis/
+│   │   │   └── fii-analyzer.test.ts
+│   │   └── scrapers/
+│   │       └── status-invest-scraper.test.ts
+│   └── infrastructure/
+│       ├── database/
+│       │   └── repositories/
+│       │       └── fii-repository.test.ts
+│       └── services/
+│           └── data-service.test.ts
+└── infrastructure/
+    └── scripts/                  # Scripts de teste e infraestrutura
+        ├── test-alerts.ts
+        ├── test-usecases.ts
+        ├── test-scheduler.ts
+        ├── test-collection-infrastructure.ts
+        └── start-scheduler.ts
+```
+
+### Tipos de Testes Implementados
+
+- **Testes Unitários**: Testam funções e classes isoladamente
+- **Testes de Integração**: Testam interação entre componentes
+- **Testes de Scrapers**: Testam coleta de dados externos
+- **Testes de Banco**: Testam operações de dados
+- **Testes de Utilitários**: Testam funções auxiliares
+
+## ⏰ Sistema de Agendamento
+
+O FII Analyzer inclui um sistema de agendamento robusto para automatizar a coleta de dados e análise:
+
+### SchedulerService
+
+O `SchedulerService` é responsável por:
+- **Coleta automática** de dados de FIIs em intervalos configuráveis
+- **Análise automática** dos FIIs coletados
+- **Verificação de alertas** em tempo real
+- **Logs detalhados** de todas as operações
+- **Controle de status** (iniciar/parar/status)
+
+### Configuração
+
+```bash
+# Variável de ambiente para controlar frequência
+export COLLECTIONS_PER_DAY=4  # 4 coletas por dia (a cada 6 horas)
+
+# Iniciar scheduler
+bun run scheduler:start
+```
+
+### Vantagens do SchedulerService
+
+✅ **Controle total** sobre execução e configuração  
+✅ **Fácil de debugar** e monitorar  
+✅ **Pode ser pausado/retomado** dinamicamente  
+✅ **Logs detalhados** para troubleshooting  
+✅ **Configuração flexível** via variáveis de ambiente  
+✅ **Compatível** com a arquitetura atual  
+
+### Alternativas Consideradas
+
+**MongoDB TTL + Change Streams:**
+- ❌ Menos flexível para controle
+- ❌ Depende do MongoDB (não compatível com Prisma)
+- ❌ Difícil de debugar
+- ✅ Mais eficiente em recursos
+- ✅ Escalável horizontalmente
+
+**Recomendação:** Para este projeto, o `SchedulerService` é a melhor escolha devido ao controle e visibilidade que oferece.
+
 ## 📊 Critérios de Análise
 
 O software utiliza os seguintes critérios para rankear os FIIs:
@@ -156,10 +282,12 @@ src/
 │   └── utils/          # Utilitários
 ├── application/         # Camada de aplicação
 │   ├── scrapers/       # Scrapers para diferentes sites
-│   └── analysis/       # Lógica de análise
+│   ├── analysis/       # Lógica de análise
+│   └── usecases/       # Casos de uso
 ├── infrastructure/      # Camada de infraestrutura
 │   ├── database/       # Banco de dados e repositórios
 │   ├── services/       # Serviços de infraestrutura
+│   ├── scripts/        # Scripts de teste e automação
 │   ├── web/           # Interface web (Express)
 │   └── config/        # Configurações
 └── index.ts           # Ponto de entrada
@@ -176,11 +304,22 @@ bun start            # Executa o projeto
 bun run web          # Inicia interface web
 bun run build        # Compila o projeto para distribuição
 
+# Testes
+bun test             # Executa todos os testes
+bun run test:watch   # Executa testes em modo watch
+bun run test:coverage # Executa testes com cobertura
+bun run test:verbose # Executa testes verbosos
+
 # Banco de dados
 bun run db:generate  # Gera cliente Prisma
 bun run db:push      # Sincroniza schema com banco
 bun run db:migrate   # Cria migration
 bun run db:studio    # Abre Prisma Studio
+
+# Scheduler e Alertas
+bun run scheduler:start  # Inicia scheduler automático
+bun run scheduler:test   # Testa funcionalidades do scheduler
+bun run start:auto       # Inicia análise automática (mesmo que scheduler:start)
 
 # Docker
 docker-compose up -d     # Inicia todos os serviços
@@ -191,9 +330,6 @@ docker-compose restart   # Reinicia serviços
 # Qualidade de código
 bun run lint         # Executa ESLint
 bun run format       # Formata código com Prettier
-
-# Testes
-bun test             # Executa testes
 ```
 
 ### Vantagens do Bun
@@ -203,6 +339,7 @@ bun test             # Executa testes
 - **Gerenciador de pacotes integrado** (npm, yarn, pnpm)
 - **Hot reload** automático em desenvolvimento
 - **Menor uso de memória**
+- **Bun Test** integrado para testes rápidos
 
 ### Arquitetura Limpa
 
@@ -237,19 +374,46 @@ O projeto segue os princípios da Clean Architecture:
 ## 🤝 Contribuindo
 
 1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
+
+### Antes de Contribuir
+
+1. **Execute os testes:**
+```bash
+bun test
+```
+
+2. **Verifique a qualidade do código:**
+```bash
+bun run lint
+bun run format
+```
+
+3. **Certifique-se de que todos os testes passam:**
+```bash
+bun run test:coverage
+```
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ## 🆘 Suporte
 
-Se você encontrar algum problema ou tiver sugestões, abra uma issue no GitHub.
+Se você encontrar algum problema ou tiver sugestões, por favor:
 
----
+1. Verifique se o problema já foi reportado nas [Issues](../../issues)
+2. Crie uma nova issue com detalhes do problema
+3. Inclua logs de erro e informações do ambiente
 
-**⚠️ Disclaimer:** Este software não oferece conselhos de investimento. Sempre consulte um profissional qualificado antes de tomar decisões de investimento.
+## 🚀 Roadmap
+
+- [ ] Sistema de alertas em tempo real
+- [ ] Análise técnica avançada
+- [ ] Relatórios em PDF/Excel
+- [ ] API pública
+- [ ] Mobile app
+- [ ] Machine learning para predições

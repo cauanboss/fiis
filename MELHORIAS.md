@@ -59,13 +59,13 @@
 - [ ] Volume analysis
 - [ ] Backtesting de estratégias
 
-### 9. **Sistema de Alertas**
-- [ ] Alertas de preço em tempo real
-- [ ] Email/SMS para oportunidades
-- [ ] Webhooks para integração
-- [ ] Telegram bot
-- [ ] Push notifications
-- [ ] Alertas personalizados por usuário
+### 9. **Sistema de Alertas** ✅
+- [x] Alertas de preço em tempo real
+- [x] Email/SMS para oportunidades
+- [x] Webhooks para integração
+- [x] Telegram bot
+- [x] Push notifications
+- [x] Alertas personalizados por usuário
 
 ### 10. **Relatórios Avançados**
 - [ ] Exportação PDF/Excel

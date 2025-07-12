@@ -25,8 +25,9 @@ export class DataService {
     return DataService.instance;
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<boolean> {
     await this.database.connect();
+    return true;
   }
 
   // Operações com FIIs
@@ -68,7 +69,7 @@ export class DataService {
   }
 
   // Operações com alertas
-  async createAlert(alert: Omit<Alert, 'id' | 'createdAt'>): Promise<number> {
+  async createAlert(alert: Omit<Alert, 'id' | 'createdAt'>): Promise<string> {
     return await this.alertRepository.createAlert(alert);
   }
 
@@ -76,11 +77,11 @@ export class DataService {
     return await this.alertRepository.getAlerts();
   }
 
-  async deleteAlert(id: number): Promise<void> {
+  async deleteAlert(id: string): Promise<void> {
     await this.alertRepository.deleteAlert(id);
   }
 
-  async updateAlert(id: number, data: Partial<Alert>): Promise<void> {
+  async updateAlert(id: string, data: Partial<Alert>): Promise<void> {
     await this.alertRepository.updateAlert(id, data);
   }
 

@@ -1,4 +1,5 @@
-export interface FII {
+// Estruturas de dados - usando type
+export type FII = {
   ticker: string;
   name: string;
   price: number;
@@ -9,9 +10,9 @@ export interface FII {
   priceVariation: number;
   source: string;
   lastUpdate: Date;
-}
+};
 
-export interface FIIAnalysis {
+export type FIIAnalysis = {
   ticker: string;
   name: string;
   price: number;
@@ -21,16 +22,16 @@ export interface FIIAnalysis {
   rank: number;
   recommendation: 'BUY' | 'HOLD' | 'SELL';
   analysis: string;
-}
+};
 
-export interface ScrapingResult {
+export type ScrapingResult = {
   success: boolean;
   data?: FII[];
   error?: string;
   source: string;
-}
+};
 
-export interface AnalysisConfig {
+export type AnalysisConfig = {
   minDividendYield: number;
   maxPVP: number;
   minPrice: number;
@@ -39,4 +40,33 @@ export interface AnalysisConfig {
   weightPVP: number;
   weightPrice: number;
   weightLiquidity: number;
-} 
+};
+
+// Tipos para o Sistema de Alertas
+export type AlertType = 'PRICE' | 'DY' | 'PVP' | 'SCORE';
+export type AlertCondition = 'ABOVE' | 'BELOW' | 'EQUALS';
+
+export type Alert = {
+  id?: string;
+  ticker: string;
+  type: AlertType;
+  condition: AlertCondition;
+  value: number;
+  active: boolean;
+  createdAt?: Date;
+  message?: string;
+};
+
+export type AlertTrigger = {
+  alert: Alert;
+  currentValue: number;
+  triggeredAt: Date;
+  message: string;
+};
+
+export type NotificationConfig = {
+  email?: string;
+  telegram?: string;
+  webhook?: string;
+  enabled: boolean;
+}; 

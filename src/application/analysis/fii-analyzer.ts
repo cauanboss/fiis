@@ -1,4 +1,4 @@
-import { FII, FIIAnalysis, AnalysisConfig } from '../domain/types/fii';
+import { FII, FIIAnalysis, AnalysisConfig } from '../../domain/types/fii.js';
 
 export class FIIAnalyzer {
   private defaultConfig: AnalysisConfig = {
@@ -11,6 +11,10 @@ export class FIIAnalyzer {
     weightPrice: 0.2,
     weightLiquidity: 0.1
   };
+
+  updateConfig(newConfig: Partial<AnalysisConfig>): void {
+    this.defaultConfig = { ...this.defaultConfig, ...newConfig };
+  }
 
   analyze(fiis: FII[], config?: Partial<AnalysisConfig>): FIIAnalysis[] {
     const analysisConfig = { ...this.defaultConfig, ...config };

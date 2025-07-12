@@ -10,12 +10,21 @@
         "web": "bun run src/web/server.ts",
         "build": "bun build src/index.ts --outdir dist",
         "test": "bun test",
+        "test:watch": "bun test --watch",
+        "test:coverage": "bun test --coverage",
+        "test:verbose": "bun test --verbose",
         "lint": "eslint src/**/*.ts",
         "format": "prettier --write src/**/*.ts",
         "db:generate": "prisma generate --schema=src/infrastructure/database/prisma/schema.prisma",
         "db:push": "prisma db push --schema=src/infrastructure/database/prisma/schema.prisma",
         "db:migrate": "prisma migrate dev --schema=src/infrastructure/database/prisma/schema.prisma",
-        "db:studio": "prisma studio --schema=src/infrastructure/database/prisma/schema.prisma"
+        "db:studio": "prisma studio --schema=src/infrastructure/database/prisma/schema.prisma",
+        "test:alerts": "bun run src/infrastructure/scripts/test-alerts.ts",
+        "test:usecases": "bun run src/infrastructure/scripts/test-usecases.ts",
+        "test:collection": "bun run src/infrastructure/scripts/test-collection-infrastructure.ts",
+        "scheduler:start": "bun run src/infrastructure/scripts/start-scheduler.ts",
+        "scheduler:test": "bun run src/infrastructure/scripts/test-scheduler.ts",
+        "start:auto": "bun run src/infrastructure/index.ts"
     },
     "prisma": {
         "schema": "src/infrastructure/database/prisma/schema.prisma"
