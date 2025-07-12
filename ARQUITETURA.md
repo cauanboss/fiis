@@ -85,7 +85,7 @@ fiis/
 - **Manutenibilidade** através de regras claras de dependência
 
 ### 2. Repository Pattern
-- **Localização**: `src/infrastructure/database/repositories/`
+- **Localização**: `src/infrastructure/repository/`
 - **Benefícios**:
   - Separação de responsabilidades
   - Facilita testes unitários

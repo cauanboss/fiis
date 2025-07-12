@@ -18,6 +18,19 @@ export abstract class BaseScraper {
 
   abstract scrape(): Promise<ScrapingResult>;
 
+  getName(): string {
+    return this.constructor.name;
+  }
+
+  async isAvailable(): Promise<boolean> {
+    try {
+      await this.httpClient.get('/');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   protected async makeRequest(url: string): Promise<string> {
     try {
       const response = await this.httpClient.get(url);
@@ -29,23 +42,23 @@ export abstract class BaseScraper {
 
   protected parseNumber(value: string): number {
     if (!value) return 0;
-    
+
     // Remove caracteres não numéricos exceto vírgula e ponto
     const cleanValue = value.replace(/[^\d,.-]/g, '');
-    
+
     // Substitui vírgula por ponto para decimal
     const normalizedValue = cleanValue.replace(',', '.');
-    
+
     const parsed = parseFloat(normalizedValue);
     return isNaN(parsed) ? 0 : parsed;
   }
 
   protected parsePercentage(value: string): number {
     if (!value) return 0;
-    
+
     const cleanValue = value.replace(/[^\d,.-]/g, '');
     const normalizedValue = cleanValue.replace(',', '.');
-    
+
     const parsed = parseFloat(normalizedValue);
     return isNaN(parsed) ? 0 : parsed;
   }

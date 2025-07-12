@@ -1,6 +1,7 @@
-import { Database } from '../database/database';
-import { FIIRepository, AlertRepository, SettingRepository, Alert, FIIHistory } from '../database/repositories/index';
+import { Database } from '../repository/database';
+import { FIIRepository, AlertRepository, SettingRepository, Alert } from '../repository/index';
 import { FII, FIIAnalysis } from '../../domain/types/fii';
+import { FIIHistory } from 'domain/types';
 
 export class DataService {
   private database: Database;
@@ -12,7 +13,7 @@ export class DataService {
   private constructor() {
     this.database = Database.getInstance();
     const prisma = this.database.getClient();
-    
+
     this.fiiRepository = new FIIRepository(prisma);
     this.alertRepository = new AlertRepository(prisma);
     this.settingRepository = new SettingRepository(prisma);

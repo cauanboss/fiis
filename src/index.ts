@@ -1,6 +1,6 @@
 import { main as startScheduler } from './infrastructure/index.js';
 import { ExpressAdapter } from './infrastructure/adapters/express-adapter.js';
-import { WebServer } from './infrastructure/web/web-server.js';
+import { WebServer } from './infrastructure/http/web-server.js';
 
 async function main() {
     try {

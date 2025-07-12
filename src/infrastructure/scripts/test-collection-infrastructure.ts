@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 
 import { FIICollectionScheduler, FIIDataWorker, eventBus } from '../collection/index.js';
-import { FIIRepository } from '../database/repositories/fiiRepository.js';
-import { AlertRepository } from '../database/repositories/alertRepository.js';
+import { FIIRepository } from '../repository/fiiRepository.js';
+import { AlertRepository } from '../repository/alertRepository.js';
 import { DataService } from '../services/dataService.js';
 import { NotificationConfig } from '../../domain/types/fii.js';
 
@@ -16,7 +16,7 @@ async function testCollectionInfrastructure() {
     await dataService.connect();
     console.log('✅ Conectado ao banco de dados');
 
-    // Configuração de notificações
+    // Configuração de notificaç
     const notificationConfig: NotificationConfig = {
       enabled: true,
       email: 'test@example.com',
@@ -34,13 +34,13 @@ async function testCollectionInfrastructure() {
 
     // 1. Testar EventBus
     console.log('\n📡 Testando EventBus...');
-    
+
     eventBus.subscribe('COLLECTION_COMPLETED', (event) => {
       console.log(`📡 Handler: Coleta concluída - ${event.data?.totalCollected} FIIs`);
     });
 
     eventBus.subscribe('ANALYSIS_COMPLETED', (event) => {
-      console.log(`📡 Handler: Análise concluída - ${event.data?.analyses?.length} FIIs analisados`);
+      console.log(`📡 Handler: Análise concluída - ${(event.data as { analyses?: unknown[] })?.analyses?.length} FIIs analisados`);
     });
 
     eventBus.subscribe('ALERT_CHECK_COMPLETED', (event) => {
@@ -51,12 +51,12 @@ async function testCollectionInfrastructure() {
     await eventBus.publish({
       type: 'COLLECTION_STARTED',
       source: 'test',
-      data: { sources: ['status-invest'] }
+      data: { sources: ['funds-explorer'] }
     });
 
     // 2. Testar Scheduler
     console.log('\n⏰ Testando Scheduler...');
-    
+
     const scheduler = new FIICollectionScheduler(
       new FIIRepository(dataService['database'].getClient()),
       new AlertRepository(dataService['database'].getClient()),
@@ -79,7 +79,7 @@ async function testCollectionInfrastructure() {
 
     // 3. Testar Worker
     console.log('\n⚙️ Testando Worker...');
-    
+
     const worker = new FIIDataWorker(
       new FIIRepository(dataService['database'].getClient())
     );

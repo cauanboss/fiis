@@ -1,20 +1,23 @@
 import * as cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
 import { FII, ScrapingResult } from '../../domain/types/fii.js';
+import { BaseScraper } from './base-scraper.js';
 
-export class FundsExplorerScraper {
-  private baseUrl = 'https://www.fundsexplorer.com.br';
+export class FundsExplorerScraper extends BaseScraper {
+  constructor() {
+    super('https://www.fundsexplorer.com.br');
+  }
 
   async scrape(): Promise<ScrapingResult> {
     let browser;
     try {
       console.log('🔍 Funds Explorer: Iniciando coleta de dados com Puppeteer...');
-      
+
       // Iniciar navegador headless
       browser = await puppeteer.launch({
         headless: true,
         args: [
-          '--no-sandbox', 
+          '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           '--disable-accelerated-2d-canvas',
@@ -23,24 +26,24 @@ export class FundsExplorerScraper {
           '--disable-gpu'
         ]
       });
-      
+
       const page = await browser.newPage();
-      
+
       // Configurar user agent para parecer um navegador real
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      
+
       // Navegar para a página
-      await page.goto(`${this.baseUrl}/ranking`, { 
+      await page.goto(`${this.baseURL}/ranking`, {
         waitUntil: 'domcontentloaded',
-        timeout: 60000 
+        timeout: 60000
       });
-      
+
       // Aguardar a tabela carregar e ter dados
       await page.waitForSelector('table tbody tr', { timeout: 30000 });
-      
+
       // Aguardar um pouco mais para garantir que todos os dados carregaram
       await new Promise(resolve => setTimeout(resolve, 5000));
-      
+
       // Extrair o HTML da página
       const html = await page.content();
       const $ = cheerio.load(html);
@@ -61,7 +64,7 @@ export class FundsExplorerScraper {
       // Mapear colunas pelo cabeçalho
       const headerRow = $('table thead tr').first();
       const headerMap: { [key: string]: number } = {};
-      
+
       headerRow.find('th').each((index, element) => {
         const headerText = $(element).text().trim();
         headerMap[headerText] = index;
@@ -94,17 +97,17 @@ export class FundsExplorerScraper {
       rows.each((index, element) => {
         const $row = $(element);
         const cells = $row.find('td');
-        
+
         // Extrair dados das células
-        const ticker = headerMap[COL_TICKER] !== undefined ? 
+        const ticker = headerMap[COL_TICKER] !== undefined ?
           cells.eq(headerMap[COL_TICKER]).text().trim() : '';
-        const priceText = headerMap[COL_PRICE] !== undefined ? 
+        const priceText = headerMap[COL_PRICE] !== undefined ?
           cells.eq(headerMap[COL_PRICE]).text().trim() : '';
-        const dyText = headerMap[COL_DY] !== undefined ? 
+        const dyText = headerMap[COL_DY] !== undefined ?
           cells.eq(headerMap[COL_DY]).text().trim() : '';
-        const pvpText = headerMap[COL_PVP] !== undefined ? 
+        const pvpText = headerMap[COL_PVP] !== undefined ?
           cells.eq(headerMap[COL_PVP]).text().trim() : '';
-        const lastDivText = headerMap[COL_LAST_DIV] !== undefined ? 
+        const lastDivText = headerMap[COL_LAST_DIV] !== undefined ?
           cells.eq(headerMap[COL_LAST_DIV]).text().trim() : '';
 
         // Log para debug
@@ -159,26 +162,26 @@ export class FundsExplorerScraper {
     }
   }
 
-  private parseNumber(text: string): number {
+  protected parseNumber(text: string): number {
     if (!text) return 0;
-    
+
     // Remove caracteres não numéricos exceto ponto e vírgula
     const cleanText = text.replace(/[^\d.,]/g, '');
-    
+
     // Substitui vírgula por ponto para decimal
     const normalizedText = cleanText.replace(',', '.');
-    
+
     const number = parseFloat(normalizedText);
     return isNaN(number) ? 0 : number;
   }
 
-  private parsePercentage(text: string): number {
+  protected parsePercentage(text: string): number {
     if (!text) return 0;
-    
+
     // Remove o símbolo % e outros caracteres
     const cleanText = text.replace(/[^\d.,]/g, '');
     const normalizedText = cleanText.replace(',', '.');
-    
+
     const number = parseFloat(normalizedText);
     return isNaN(number) ? 0 : number;
   }

@@ -8,10 +8,9 @@ export class Database {
     this.prisma = new PrismaClient({
       datasources: {
         db: {
-          url: process.env.DATABASE_URL || 'file:./src/infrastructure/database/data/fiis.db'
+          url: process.env.DATABASE_URL || 'mongodb://localhost:27017/fiis'
         }
       },
-      // Disable transactions for MongoDB
       log: ['error', 'warn'],
       errorFormat: 'pretty'
     });

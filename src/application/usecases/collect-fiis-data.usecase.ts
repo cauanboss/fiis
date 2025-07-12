@@ -1,19 +1,12 @@
-import { StatusInvestScraper } from '../scrapers/status-invest-scraper.js';
-import { FundsExplorerScraper } from '../scrapers/fundsexplorer-scraper.js';
-import { ClubeFIIScraper } from '../scrapers/clubefii-scraper.js';
 import { FIIRepositoryInterface } from '../../domain/repositories/index.js';
+import { ScraperFactory } from '../factories/scraper-factory.js';
 import { FII, ScrapingResult, CollectFiisDataRequest, CollectFiisDataResponse } from '../../domain/types/index.js';
 
 export class CollectFiisDataUseCase {
   private fiiRepository: FIIRepositoryInterface;
-  private scrapers: Map<string, { scrape(): Promise<ScrapingResult> }>;
 
-  constructor(fiiRepository?: FIIRepositoryInterface) {
-    this.fiiRepository = fiiRepository!;
-    this.scrapers = new Map();
-    this.scrapers.set('status-invest', new StatusInvestScraper());
-    this.scrapers.set('funds-explorer', new FundsExplorerScraper());
-    this.scrapers.set('clube-fii', new ClubeFIIScraper());
+  constructor(fiiRepository: FIIRepositoryInterface) {
+    this.fiiRepository = fiiRepository;
   }
 
   async execute(request: CollectFiisDataRequest): Promise<CollectFiisDataResponse> {
@@ -25,8 +18,8 @@ export class CollectFiisDataUseCase {
     console.log(`📡 Iniciando coleta de dados de ${sources.length} fontes...`);
 
     for (const source of sources) {
-      const scraper = this.scrapers.get(source);
-      
+      const scraper = ScraperFactory.createScraper(source);
+
       if (!scraper) {
         const error = `Scraper não encontrado para fonte: ${source}`;
         console.error(`❌ ${error}`);
@@ -42,7 +35,7 @@ export class CollectFiisDataUseCase {
       try {
         console.log(`🔍 Coletando dados de: ${source}`);
         const result = await scraper.scrape();
-        
+
         if (result.success && result.data) {
           console.log(`✅ ${result.data.length} FIIs coletados de ${source}`);
           allFiis.push(...result.data);

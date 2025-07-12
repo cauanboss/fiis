@@ -68,10 +68,10 @@ export class FIICollectionScheduler {
    */
   stop(): void {
     console.log('🛑 Parando FII Collection Scheduler...');
-    
+
     this.intervals.forEach(interval => clearInterval(interval));
     this.intervals = [];
-    
+
     console.log('✅ Scheduler parado');
   }
 
@@ -83,15 +83,15 @@ export class FIICollectionScheduler {
       try {
         console.log('📡 Iniciando coleta de dados...');
         const result = await this.collectUseCase.execute({
-          sources: ['status-invest'],
+          sources: ['funds-explorer'],
           saveToDatabase: true
         });
-        
+
         console.log(`✅ Coleta concluída: ${result.totalCollected} FIIs coletados`);
-        
+
         // Emitir evento de coleta concluída
         this.emitCollectionCompleted(result);
-        
+
       } catch (error) {
         console.error('❌ Erro na coleta de dados:', error);
       }
@@ -109,13 +109,13 @@ export class FIICollectionScheduler {
       try {
         console.log('📊 Iniciando análise de FIIs...');
         const result = await this.analyzeUseCase.execute();
-        
+
         console.log(`✅ Análise concluída: ${result.analyses.length} FIIs analisados`);
         console.log(`📈 Estatísticas: ${result.stats.buyCount} BUY, ${result.stats.holdCount} HOLD, ${result.stats.sellCount} SELL`);
-        
+
         // Emitir evento de análise concluída
         this.emitAnalysisCompleted(result);
-        
+
       } catch (error) {
         console.error('❌ Erro na análise de FIIs:', error);
       }
@@ -133,16 +133,16 @@ export class FIICollectionScheduler {
       try {
         console.log('🔔 Verificando alertas...');
         const result = await this.checkAlertsUseCase.execute();
-        
+
         if (result.triggeredCount > 0) {
           console.log(`🚨 ${result.triggeredCount} alertas disparados!`);
         } else {
           console.log('✅ Nenhum alerta disparado');
         }
-        
+
         // Emitir evento de verificação de alertas
         this.emitAlertCheckCompleted(result);
-        
+
       } catch (error) {
         console.error('❌ Erro na verificação de alertas:', error);
       }
@@ -158,7 +158,7 @@ export class FIICollectionScheduler {
   async executeCollection(): Promise<void> {
     console.log('📡 Executando coleta manual...');
     const result = await this.collectUseCase.execute({
-      sources: ['status-invest'],
+      sources: ['funds-explorer'],
       saveToDatabase: true
     });
     console.log(`✅ Coleta manual concluída: ${result.totalCollected} FIIs`);
@@ -201,7 +201,7 @@ export class FIICollectionScheduler {
     // Em produção, seria um sistema de eventos real
     console.log('📊 Evento: Análise de FIIs concluída', {
       timestamp: new Date().toISOString(),
-      totalAnalyzed: result.analyses.length,
+      totalAnalyzed: (result.analyses as unknown[]).length,
       stats: result.stats
     });
   }

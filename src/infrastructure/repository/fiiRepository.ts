@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { FII, FIIAnalysis, FIIHistory } from '../../../domain/types/index.js';
+import { FII, FIIAnalysis, FIIHistory } from '../../domain/types/index.js';
 
 export class FIIRepository {
   private prisma: PrismaClient;
@@ -56,6 +56,12 @@ export class FIIRepository {
   }
 
   async saveFIIHistory(fiis: FII[]): Promise<void> {
+    // Temporariamente desabilitado devido ao requisito de replica set do MongoDB
+    // Para funcionar, seria necessário configurar o MongoDB como replica set
+    console.log(`📊 Histórico de ${fiis.length} FIIs seria salvo (funcionalidade desabilitada temporariamente)`);
+    return;
+
+    /* Código original comentado:
     for (const fii of fiis) {
       try {
         await this.prisma.fIIHistory.create({
@@ -73,6 +79,7 @@ export class FIIRepository {
         console.error(`❌ Erro ao salvar histórico do FII ${fii.ticker}:`, error);
       }
     }
+    */
   }
 
   async getFiis(): Promise<FII[]> {

@@ -7,12 +7,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model FII {
-  id               String   @id @default(cuid())
+  id               String   @id @default(cuid()) @map("_id")
   ticker           String   @unique
   name             String
   price            Float
@@ -35,7 +35,7 @@ model FII {
 }
 
 model FIIHistory {
-  id            String   @id @default(cuid())
+  id            String   @id @default(cuid()) @map("_id")
   ticker        String
   price         Float
   dividendYield Float
@@ -51,7 +51,7 @@ model FIIHistory {
 }
 
 model FIIAnalysis {
-  id             String   @id @default(cuid())
+  id             String   @id @default(cuid()) @map("_id")
   ticker         String
   name           String
   price          Float
@@ -70,7 +70,7 @@ model FIIAnalysis {
 }
 
 model Alert {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid()) @map("_id")
   ticker    String
   type      String // 'PRICE' | 'DY' | 'PVP'
   condition String // 'ABOVE' | 'BELOW'
@@ -85,7 +85,7 @@ model Alert {
 }
 
 model Setting {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid()) @map("_id")
   key       String   @unique
   value     String
   updatedAt DateTime @updatedAt

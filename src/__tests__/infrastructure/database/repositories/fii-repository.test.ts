@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { FIIRepository } from "../../../../infrastructure/database/repositories/fiiRepository";
+import { FIIRepository } from "../../../../infrastructure/repository/fiiRepository";
 import { PrismaClient } from "@prisma/client";
 import { FII } from "../../../../domain/types/fii";
 
@@ -16,7 +16,7 @@ describe("FIIRepository", () => {
       }
     });
     repository = new FIIRepository(prisma);
-    
+
     // Limpar banco de teste de forma segura
     try {
       await prisma.fIIAnalysis.deleteMany();
@@ -50,7 +50,7 @@ describe("FIIRepository", () => {
       ];
 
       await repository.saveFiis(mockFiis);
-      
+
       const savedFII = await prisma.fII.findUnique({
         where: { ticker: "HGLG11" }
       });
@@ -95,7 +95,7 @@ describe("FIIRepository", () => {
       ];
 
       await repository.saveFiis(updatedFiis);
-      
+
       const updatedFII = await prisma.fII.findUnique({
         where: { ticker: "HGLG11" }
       });
@@ -139,7 +139,7 @@ describe("FIIRepository", () => {
       });
 
       const fiis = await repository.getFiis();
-      
+
       expect(fiis.length).toBe(2);
       expect(fiis[0].ticker).toBe("HGLG11");
       expect(fiis[1].ticker).toBe("XPML11");
@@ -169,7 +169,7 @@ describe("FIIRepository", () => {
       });
 
       const fii = await repository.getFIIByTicker("HGLG11");
-      
+
       expect(fii).toBeDefined();
       expect(fii?.ticker).toBe("HGLG11");
       expect(fii?.name).toBe("CSHG Logística");
@@ -215,7 +215,7 @@ describe("FIIRepository", () => {
       ];
 
       await repository.saveFIIHistory(mockFiis);
-      
+
       const history = await prisma.fIIHistory.findMany({
         where: { ticker: "HGLG11" }
       });
@@ -259,7 +259,7 @@ describe("FIIRepository", () => {
       ];
 
       await repository.saveAnalyses(mockAnalyses);
-      
+
       const analyses = await prisma.fIIAnalysis.findMany({
         where: { ticker: "HGLG11" }
       });
@@ -323,7 +323,7 @@ describe("FIIRepository", () => {
       });
 
       const latestAnalyses = await repository.getLatestAnalyses();
-      
+
       expect(latestAnalyses.length).toBe(1);
       expect(latestAnalyses[0].ticker).toBe("HGLG11");
       expect(latestAnalyses[0].price).toBe(155.00); // Deve retornar a mais recente
@@ -392,7 +392,7 @@ describe("FIIRepository", () => {
       });
 
       const stats = await repository.getDatabaseStats();
-      
+
       expect(stats.totalFiis).toBe(2);
       expect(stats.totalHistoryRecords).toBe(1);
       expect(stats.totalAnalyses).toBe(1);

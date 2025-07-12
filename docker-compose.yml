@@ -1,14 +1,13 @@
 # Docker Compose configuration for FII Analyzer
 
 services:
-  # MongoDB Database
+  # MongoDB Database (Replica Set)
   mongodb:
     image: mongo:7.0
     container_name: fii-mongodb
     restart: unless-stopped
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all" ]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: fii_password
       MONGO_INITDB_DATABASE: fii_analyzer
     ports:
       - "27017:27017"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 
 import { SchedulerService } from '../services/scheduler-service.js';
-import { FIIRepository } from '../database/repositories/fiiRepository.js';
-import { AlertRepository } from '../database/repositories/alertRepository.js';
+import { FIIRepository } from '../repository/fiiRepository.js';
+import { AlertRepository } from '../repository/alertRepository.js';
 import { DataService } from '../services/dataService.js';
 import dotenv from 'dotenv';
 
@@ -37,7 +37,7 @@ async function testScheduler() {
 
   // Teste 4: Executar tarefas manuais
   console.log('\n🔧 Testando execução manual...');
-  
+
   try {
     await scheduler.executeCollection();
   } catch (error) {

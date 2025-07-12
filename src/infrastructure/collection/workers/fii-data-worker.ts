@@ -27,7 +27,7 @@ export class FIIDataWorker {
   private results: WorkerResult[] = [];
 
   constructor(fiiRepository: FIIRepositoryInterface) {
-    this.collectUseCase = new CollectFiisDataUseCase();
+    this.collectUseCase = new CollectFiisDataUseCase(fiiRepository);
     this.analyzeUseCase = new AnalyzeFiisUseCase(fiiRepository);
   }
 
@@ -104,7 +104,7 @@ export class FIIDataWorker {
       switch (job.type) {
         case 'COLLECT':
           result = await this.collectUseCase.execute({
-            sources: ['status-invest'],
+            sources: ['funds-explorer'],
             saveToDatabase: true
           });
           break;
@@ -115,7 +115,7 @@ export class FIIDataWorker {
 
         case 'BOTH': {
           const collectResult = await this.collectUseCase.execute({
-            sources: ['status-invest'],
+            sources: ['funds-explorer'],
             saveToDatabase: true
           });
           const analyzeResult = await this.analyzeUseCase.execute();
@@ -216,7 +216,7 @@ export class FIIDataWorker {
 
     // Calcular jobs por hora (baseado nos últimos resultados)
     const recentResults = this.results.slice(-20); // Últimos 20 jobs
-    const timeSpan = recentResults.length > 1 
+    const timeSpan = recentResults.length > 1
       ? (recentResults[recentResults.length - 1]?.completedAt.getTime() || 0) - (recentResults[0]?.completedAt.getTime() || 0)
       : 0;
     const jobsPerHour = timeSpan > 0 ? (recentResults.length / (timeSpan / (1000 * 60 * 60))) : 0;

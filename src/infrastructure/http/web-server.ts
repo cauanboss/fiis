@@ -8,8 +8,8 @@ import {
 } from '../../application/usecases/index.js';
 import { NotificationConfig } from '../../domain/types/fii.js';
 import { PrismaClient } from '@prisma/client';
-import { FIIRepository } from '../database/repositories/fiiRepository.js';
-import { AlertRepository } from '../database/repositories/alertRepository.js';
+import { FIIRepository } from '../repository/fiiRepository.js';
+import { AlertRepository } from '../repository/alertRepository.js';
 import express from 'express';
 
 export class WebServer {

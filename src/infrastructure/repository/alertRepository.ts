@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { AlertType, AlertCondition } from '../../../domain/types/fii';
+import { AlertType, AlertCondition } from '../../domain/types/fii';
 
 export type Alert = {
   id?: string;
@@ -71,9 +71,9 @@ export class AlertRepository {
 
   async getAlertsByTicker(ticker: string): Promise<Alert[]> {
     const alerts = await this.prisma.alert.findMany({
-      where: { 
+      where: {
         ticker: ticker.toUpperCase(),
-        active: true 
+        active: true
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -151,9 +151,9 @@ export class AlertRepository {
    */
   async getAlertsByType(type: AlertType): Promise<Alert[]> {
     const alerts = await this.prisma.alert.findMany({
-      where: { 
+      where: {
         type,
-        active: true 
+        active: true
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -174,9 +174,9 @@ export class AlertRepository {
    */
   async deactivateAlertsByTicker(ticker: string): Promise<void> {
     await this.prisma.alert.updateMany({
-      where: { 
+      where: {
         ticker: ticker.toUpperCase(),
-        active: true 
+        active: true
       },
       data: { active: false }
     });
@@ -187,9 +187,9 @@ export class AlertRepository {
    */
   async activateAlertsByTicker(ticker: string): Promise<void> {
     await this.prisma.alert.updateMany({
-      where: { 
+      where: {
         ticker: ticker.toUpperCase(),
-        active: false 
+        active: false
       },
       data: { active: true }
     });

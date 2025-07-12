@@ -1,19 +1,22 @@
 import * as cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
 import { FII, ScrapingResult } from '../../domain/types/fii.js';
+import { BaseScraper } from './base-scraper.js';
 
-export class ClubeFIIScraper {
-  private baseUrl = 'https://www.clubefii.com.br';
+export class ClubeFIIScraper extends BaseScraper {
+  constructor() {
+    super('https://www.clubefii.com.br');
+  }
 
   async scrape(): Promise<ScrapingResult> {
     let browser;
     try {
       console.log('🔍 Clube FII: Iniciando coleta de dados com Puppeteer...');
-      
+
       browser = await puppeteer.launch({
         headless: true,
         args: [
-          '--no-sandbox', 
+          '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           '--disable-accelerated-2d-canvas',
@@ -22,18 +25,18 @@ export class ClubeFIIScraper {
           '--disable-gpu'
         ]
       });
-      
+
       const page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      
-      await page.goto(`${this.baseUrl}/fiis`, { 
+
+      await page.goto(`${this.baseURL}/fiis`, {
         waitUntil: 'domcontentloaded',
-        timeout: 60000 
+        timeout: 60000
       });
-      
+
       await page.waitForSelector('table', { timeout: 30000 });
       await new Promise(resolve => setTimeout(resolve, 5000));
-      
+
       const html = await page.content();
       const $ = cheerio.load(html);
       const fiis: FII[] = [];
@@ -42,7 +45,7 @@ export class ClubeFIIScraper {
       $('table tbody tr').each((index, element) => {
         const $row = $(element);
         const cells = $row.find('td');
-        
+
         if (cells.length >= 6) {
           const ticker = cells.eq(0).text().trim();
           const name = cells.eq(1).text().trim();
@@ -101,7 +104,7 @@ export class ClubeFIIScraper {
     }
   }
 
-  private parseNumber(text: string): number {
+  protected parseNumber(text: string): number {
     if (!text) return 0;
     const cleanText = text.replace(/[^\d.,]/g, '');
     const normalizedText = cleanText.replace(',', '.');
@@ -109,7 +112,7 @@ export class ClubeFIIScraper {
     return isNaN(number) ? 0 : number;
   }
 
-  private parsePercentage(text: string): number {
+  protected parsePercentage(text: string): number {
     if (!text) return 0;
     const cleanText = text.replace(/[^\d.,]/g, '');
     const normalizedText = cleanText.replace(',', '.');
