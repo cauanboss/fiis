@@ -7,13 +7,13 @@ export interface WorkerJob {
   type: 'COLLECT' | 'ANALYZE' | 'BOTH';
   priority: 'LOW' | 'NORMAL' | 'HIGH';
   createdAt: Date;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 export interface WorkerResult {
   jobId: string;
   success: boolean;
-  result?: any;
+  result?: Record<string, unknown>;
   error?: string;
   duration: number;
   completedAt: Date;
@@ -99,7 +99,7 @@ export class FIIDataWorker {
     console.log(`⚙️ Processando job: ${job.id} (${job.type})`);
 
     try {
-      let result: any;
+      let result: Record<string, unknown>;
 
       switch (job.type) {
         case 'COLLECT':
@@ -113,7 +113,7 @@ export class FIIDataWorker {
           result = await this.analyzeUseCase.execute();
           break;
 
-        case 'BOTH':
+        case 'BOTH': {
           const collectResult = await this.collectUseCase.execute({
             sources: ['status-invest'],
             saveToDatabase: true
@@ -121,6 +121,7 @@ export class FIIDataWorker {
           const analyzeResult = await this.analyzeUseCase.execute();
           result = { collect: collectResult, analyze: analyzeResult };
           break;
+        }
 
         default:
           throw new Error(`Tipo de job desconhecido: ${job.type}`);

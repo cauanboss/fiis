@@ -1,6 +1,6 @@
 import { AlertService } from '../../domain/services/alertService';
 import { NotificationService } from '../../domain/services/notificationService';
-import { Alert, AlertTrigger, FII, FIIAnalysis, NotificationConfig } from '../../domain/types/fii';
+import { Alert, AlertTrigger, FIIAnalysis, NotificationConfig } from '../../domain/types/fii';
 import { DataService } from '../../infrastructure/services/dataService';
 
 export class AlertManagerService {

@@ -1,5 +1,5 @@
 import { AlertRepositoryInterface } from '../../domain/repositories/index.js';
-import { Alert, AlertType, AlertCondition, CreateAlertRequest, CreateAlertResponse } from '../../domain/types/index.js';
+import { Alert, CreateAlertRequest, CreateAlertResponse } from '../../domain/types/index.js';
 
 export class CreateAlertUseCase {
   private alertRepository: AlertRepositoryInterface;

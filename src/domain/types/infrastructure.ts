@@ -26,7 +26,7 @@ export type EventType = 'collection_completed' | 'analysis_completed' | 'alert_t
 
 export type Event = {
   type: EventType;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: Date;
 };
 
@@ -38,14 +38,14 @@ export type EventHandler = {
 export type WorkerJob = {
   id: string;
   type: string;
-  data: any;
+  data: Record<string, unknown>;
   priority: number;
 };
 
 export type WorkerResult = {
   jobId: string;
   success: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   error?: string;
   duration: number;
 }; 

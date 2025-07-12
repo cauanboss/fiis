@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, mock } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { StatusInvestScraper } from "../../../application/scrapers/status-invest-scraper";
 import { ScrapingResult } from "../../../domain/types/fii";
 

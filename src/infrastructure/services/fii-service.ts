@@ -3,7 +3,7 @@ import { FundsExplorerScraper } from '../application/scrapers/fundsexplorer-scra
 import { BrapiScraper } from '../application/scrapers/brapi-scraper.js';
 import { ClubeFIIScraper } from '../application/scrapers/clubefii-scraper.js';
 import { FIIAnalyzer } from '../application/analysis/fii-analyzer.js';
-import { FII, FIIAnalysis, ScrapingResult } from '../domain/types/fii.js';
+import { FII, FIIAnalysis } from '../domain/types/fii.js';
 import chalk from 'chalk';
 import ora from 'ora';
 

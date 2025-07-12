@@ -7,7 +7,7 @@ export interface FIIRepositoryInterface {
   getTopFiis(limit?: number): Promise<FII[]>;
   getFiisBySource(source: string): Promise<FII[]>;
   saveFIIHistory(fiis: FII[]): Promise<void>;
-  getFIIHistory(ticker: string, days?: number): Promise<any[]>;
+  getFIIHistory(ticker: string, days?: number): Promise<Record<string, unknown>[]>;
   saveAnalyses(analyses: FIIAnalysis[]): Promise<void>;
   getLatestAnalyses(): Promise<FIIAnalysis[]>;
   getDatabaseStats(): Promise<{

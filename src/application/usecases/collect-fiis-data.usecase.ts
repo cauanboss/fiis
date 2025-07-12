@@ -6,7 +6,7 @@ import { FII, ScrapingResult, CollectFiisDataRequest, CollectFiisDataResponse } 
 
 export class CollectFiisDataUseCase {
   private fiiRepository: FIIRepositoryInterface;
-  private scrapers: Map<string, any>;
+  private scrapers: Map<string, { scrape(): Promise<ScrapingResult> }>;
 
   constructor(fiiRepository?: FIIRepositoryInterface) {
     this.fiiRepository = fiiRepository!;

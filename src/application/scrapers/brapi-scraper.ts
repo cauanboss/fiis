@@ -13,10 +13,10 @@ export class BrapiScraper {
   async scrape(): Promise<ScrapingResult> {
     try {
       console.log('🔍 Brapi: Iniciando coleta de dados...');
-      
+
       // Buscar lista de FIIs (todos os ativos que terminam com 11)
       const fiis = await this.getFIIList();
-      
+
       if (fiis.length === 0) {
         console.log('⚠️  Brapi: Nenhum FII encontrado');
         return { success: false, data: [], error: 'Nenhum FII encontrado', source: 'Brapi' };
@@ -33,9 +33,9 @@ export class BrapiScraper {
         const batchData = await Promise.all(
           batch.map(fii => this.getFIIDetails(fii))
         );
-        
+
         detailedFiis.push(...batchData.filter(fii => fii !== null));
-        
+
         // Pequena pausa entre lotes para não sobrecarregar a API
         if (i + batchSize < fiis.length) {
           await new Promise(resolve => setTimeout(resolve, BRAPI_CONFIG.BATCH_DELAY));
@@ -43,7 +43,7 @@ export class BrapiScraper {
       }
 
       console.log(`✅ Brapi: ${detailedFiis.length} FIIs coletados com sucesso`);
-      
+
       return {
         success: true,
         data: detailedFiis,
@@ -80,8 +80,8 @@ export class BrapiScraper {
 
       // Filtrar apenas FIIs (ativos que terminam com 11)
       const fiis = response.data.results
-        .filter((item: any) => item.symbol && item.symbol.endsWith('11'))
-        .map((item: any) => item.symbol);
+        .filter((item: Record<string, unknown>) => item.symbol && typeof item.symbol === 'string' && item.symbol.endsWith('11'))
+        .map((item: Record<string, unknown>) => item.symbol as string);
 
       return fiis;
 
@@ -107,35 +107,34 @@ export class BrapiScraper {
 
       const data = response.data.results[0];
       const dividends = data.dividends || [];
-      const earnings = data.earnings || [];
 
       // Calcular dividend yield dos últimos 12 meses
       const last12MonthsDividends = dividends
-        .filter((div: any) => {
-          const paymentDate = new Date(div.paymentDate);
+        .filter((div: Record<string, unknown>) => {
+          const paymentDate = new Date(div.paymentDate as string);
           const oneYearAgo = new Date();
           oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
           return paymentDate >= oneYearAgo;
         })
-        .reduce((sum: number, div: any) => sum + (div.amount || 0), 0);
+        .reduce((sum: number, div: Record<string, unknown>) => sum + ((div.amount as number) || 0), 0);
 
-      const dividendYield = data.regularMarketPrice > 0 
-        ? (last12MonthsDividends / data.regularMarketPrice) * 100 
+      const dividendYield = data.regularMarketPrice > 0
+        ? (last12MonthsDividends / data.regularMarketPrice) * 100
         : 0;
 
-      // Calcular rendimento médio mensal dos últimos 12 meses
-      const monthlyDividends = dividends
-        .filter((div: any) => {
-          const paymentDate = new Date(div.paymentDate);
-          const oneYearAgo = new Date();
-          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-          return paymentDate >= oneYearAgo;
-        })
-        .slice(0, 12); // Últimos 12 meses
+      // Calcular rendimento médio mensal dos últimos 12 meses (não usado atualmente)
+      // const monthlyDividends = dividends
+      //   .filter((div: Record<string, unknown>) => {
+      //     const paymentDate = new Date(div.paymentDate as string);
+      //     const oneYearAgo = new Date();
+      //     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      //     return paymentDate >= oneYearAgo;
+      //   })
+      //   .slice(0, 12); // Últimos 12 meses
 
-      const averageMonthlyDividend = monthlyDividends.length > 0
-        ? monthlyDividends.reduce((sum: number, div: any) => sum + (div.amount || 0), 0) / monthlyDividends.length
-        : 0;
+      // const averageMonthlyDividend = monthlyDividends.length > 0
+      //   ? monthlyDividends.reduce((sum: number, div: Record<string, unknown>) => sum + ((div.amount as number) || 0), 0) / monthlyDividends.length
+      //   : 0;
 
       const fii: FII = {
         ticker: symbol,

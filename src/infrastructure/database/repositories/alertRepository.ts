@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Alert as DomainAlert, AlertType, AlertCondition } from '../../../domain/types/fii';
+import { AlertType, AlertCondition } from '../../../domain/types/fii';
 
 export type Alert = {
   id?: string;
@@ -119,7 +119,7 @@ export class AlertRepository {
         case 'PVP':
           currentValue = fii.pvp;
           break;
-        case 'SCORE':
+        case 'SCORE': {
           // Para SCORE, precisamos buscar a análise mais recente
           const analysis = await this.prisma.fIIAnalysis.findFirst({
             where: { ticker: alert.ticker },
@@ -127,6 +127,7 @@ export class AlertRepository {
           });
           currentValue = analysis?.score || 0;
           break;
+        }
       }
 
       if (alert.condition === 'ABOVE' && currentValue > alert.value) {

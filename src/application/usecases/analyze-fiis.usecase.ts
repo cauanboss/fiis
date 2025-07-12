@@ -1,6 +1,6 @@
 import { FIIAnalyzer } from '../analysis/fii-analyzer.js';
 import { FIIRepositoryInterface } from '../../domain/repositories/index.js';
-import { FIIAnalysis, AnalysisConfig, AnalyzeFiisRequest, AnalyzeFiisResponse } from '../../domain/types/index.js';
+import { FIIAnalysis, AnalyzeFiisRequest, AnalyzeFiisResponse } from '../../domain/types/index.js';
 
 export class AnalyzeFiisUseCase {
   private fiiRepository: FIIRepositoryInterface;

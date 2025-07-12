@@ -20,7 +20,9 @@ export class CheckAlertsUseCase {
     }
   }
 
-  async execute(request: CheckAlertsRequest = {}): Promise<CheckAlertsResponse> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async execute(_request: CheckAlertsRequest = {}): Promise<CheckAlertsResponse> {
+    // TODO: Implement request parameters when needed
     // 1. Buscar todos os alertas ativos
     const alerts = await this.alertRepository.getAlerts();
     const activeAlerts = alerts.filter(alert => alert.active);
@@ -53,10 +55,10 @@ export class CheckAlertsUseCase {
       }
 
       const trigger = AlertService.checkAlert(alert, fii, analysis);
-      
+
       if (trigger) {
         triggeredAlerts.push(trigger);
-        
+
         // Enviar notificação se configurado
         if (this.notificationService) {
           try {
@@ -86,7 +88,7 @@ export class CheckAlertsUseCase {
   async executeForFII(ticker: string): Promise<AlertTrigger[]> {
     const alerts = await this.alertRepository.getAlertsByTicker(ticker);
     const fii = await this.fiiRepository.getFIIByTicker(ticker);
-    
+
     if (!fii) {
       throw new Error(`FII ${ticker} não encontrado`);
     }
@@ -101,7 +103,7 @@ export class CheckAlertsUseCase {
       }
 
       const trigger = AlertService.checkAlert(alert, fii, analysis);
-      
+
       if (trigger) {
         triggeredAlerts.push(trigger);
       }

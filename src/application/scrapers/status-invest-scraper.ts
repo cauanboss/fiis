@@ -27,7 +27,7 @@ export class StatusInvestScraper extends BaseScraper {
         }
       });
       const data = response.data?.data || [];
-      const fiis: FII[] = data.map((item: any) => {
+      const fiis: FII[] = data.map((item: Record<string, unknown>) => {
         return {
           ticker: item.ticker,
           name: item.fantasyName || item.name || '',

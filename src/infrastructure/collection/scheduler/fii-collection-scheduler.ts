@@ -185,7 +185,7 @@ export class FIICollectionScheduler {
   /**
    * Emite evento de coleta concluída
    */
-  private emitCollectionCompleted(result: any): void {
+  private emitCollectionCompleted(result: Record<string, unknown>): void {
     // Em produção, seria um sistema de eventos real
     console.log('📡 Evento: Coleta de dados concluída', {
       timestamp: new Date().toISOString(),
@@ -197,7 +197,7 @@ export class FIICollectionScheduler {
   /**
    * Emite evento de análise concluída
    */
-  private emitAnalysisCompleted(result: any): void {
+  private emitAnalysisCompleted(result: Record<string, unknown>): void {
     // Em produção, seria um sistema de eventos real
     console.log('📊 Evento: Análise de FIIs concluída', {
       timestamp: new Date().toISOString(),
@@ -209,7 +209,7 @@ export class FIICollectionScheduler {
   /**
    * Emite evento de verificação de alertas concluída
    */
-  private emitAlertCheckCompleted(result: any): void {
+  private emitAlertCheckCompleted(result: Record<string, unknown>): void {
     // Em produção, seria um sistema de eventos real
     console.log('🔔 Evento: Verificação de alertas concluída', {
       timestamp: new Date().toISOString(),

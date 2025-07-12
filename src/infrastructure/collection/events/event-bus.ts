@@ -16,7 +16,7 @@ export interface Event {
   id: string;
   type: EventType;
   timestamp: Date;
-  data?: any;
+  data?: Record<string, unknown>;
   source: string;
 }
 

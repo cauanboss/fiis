@@ -27,18 +27,18 @@ export type CollectFiisDataRequest = {
 
 export type CollectFiisDataResponse = {
   totalCollected: number;
-  sources: Record<string, any>;
+  sources: Record<string, Record<string, unknown>>;
   errors: string[];
 };
 
 // CheckAlertsUseCase
 export type CheckAlertsRequest = {
-  notificationConfig?: any;
+  notificationConfig?: Record<string, unknown>;
 };
 
 export type CheckAlertsResponse = {
   triggeredCount: number;
-  triggeredAlerts: any[];
+  triggeredAlerts: Record<string, unknown>[];
   summary: {
     totalAlerts: number;
     activeAlerts: number;
@@ -49,15 +49,15 @@ export type CheckAlertsResponse = {
 // CreateAlertUseCase
 export type CreateAlertRequest = {
   ticker: string;
-  type: any;
-  condition: any;
+  type: string;
+  condition: string;
   value: number;
   message?: string;
 };
 
 export type CreateAlertResponse = {
   alertId: string;
-  alert: any;
+  alert: Record<string, unknown>;
   success: boolean;
   message: string;
 }; 

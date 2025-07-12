@@ -22,7 +22,7 @@ describe("FIIRepository", () => {
       await prisma.fIIAnalysis.deleteMany();
       await prisma.fIIHistory.deleteMany();
       await prisma.fII.deleteMany();
-    } catch (error) {
+    } catch {
       // Ignorar erros se as tabelas não existirem
       console.log("Tabelas não existem ainda, continuando...");
     }
